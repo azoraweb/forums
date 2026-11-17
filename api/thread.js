@@ -5,11 +5,13 @@
 
 const config = require("../config");
 const db = require("../lib/db");
+const { gate } = require("../lib/features");
 const { handler, HttpError, noStore } = require("../lib/http");
 const { viewer, requireActive } = require("../lib/auth");
 const F = require("../lib/forum");
 
 module.exports = handler(async (req, res) => {
+  await gate(req, "forums");
   switch (req.method) {
     case "GET": return get(req, res);
     case "PATCH": return edit(req, res);

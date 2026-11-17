@@ -7,11 +7,13 @@
 
 const config = require("../config");
 const db = require("../lib/db");
+const { gate } = require("../lib/features");
 const { handler, HttpError, noStore } = require("../lib/http");
 const { viewer } = require("../lib/auth");
 const F = require("../lib/forum");
 
 module.exports = handler(async (req, res) => {
+  await gate(req, "forums");
   switch (req.method) {
     case "GET": return list(req, res);
     case "POST": return create(req, res);

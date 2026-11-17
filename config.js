@@ -12,6 +12,10 @@ module.exports = {
   ADMIN_PLAN_ID: "pln_administrator-jz1ge0dzd",
   MODERATOR_PLAN_ID: "pln_moderator-zh8z0cl8",
 
+  // Developers (and admins) can still see features that are switched to
+  // "dev mode" — with a DEV badge. Everyone else sees "Under construction".
+  DEVELOPER_PLAN_ID: "pln_developer-qk9e0ch7",
+
   // Set to false if only admins (not moderators) should create, rename or
   // archive forums. Moderators keep every other power either way.
   MODERATORS_CAN_MANAGE_FORUMS: true,
@@ -69,6 +73,29 @@ module.exports = {
 
   // How long public pages may be cached at Vercel's edge (seconds).
   FEED_CACHE_SECONDS: 10,
+
+  // ---- FEATURE SWITCHES (admin panel) --------------------------------------
+  // Webflow page where the admin panel lives (used for "Manage" links).
+  ADMIN_PAGE: "/admin",
+
+  // Features created the first time the switches are set up. Add, edit or
+  // remove them from the admin panel afterwards — this list isn't used again.
+  //   paths:     pages that show "Under construction" ("/business/*" = every page under /business/)
+  //   selectors: page sections to swap for an "Under construction" card
+  // Every feature also covers any Webflow element with the custom attribute
+  // data-azora-feature="<key>". Directory tabs use the keys businesses,
+  // groups, audios, churches and lkbi.
+  STARTER_FEATURES: [
+    { key: "forums", name: "Forums", description: "Azora Forums at /forums.", paths: ["/forums"], selectors: ["[data-azora-forums]"] },
+    { key: "changelog", name: "What's New (changelog)", description: "The updates page.", paths: ["/updates"], selectors: ["[data-azora-changelog]"] },
+    { key: "businesses", name: "Businesses", description: "Businesses tab in the directory.", paths: [], selectors: [] },
+    { key: "business-posts", name: "Business posts", description: "Posts businesses share on their pages and dashboard.", paths: [], selectors: [] },
+    { key: "groups", name: "Groups", description: "Groups tab in the directory.", paths: [], selectors: [] },
+    { key: "audios", name: "Audios", description: "Audios tab in the directory.", paths: [], selectors: [] },
+    { key: "churches", name: "Churches", description: "Churches tab in the directory.", paths: [], selectors: [] },
+    { key: "lkbi", name: "LKBI", description: "Little Kids Big Ideas page and directory tab.", paths: ["/lkbi"], selectors: [] },
+    { key: "events", name: "AzoraEvents", description: "The events page.", paths: ["/events-azora"], selectors: [] },
+  ],
 
   // Forums created the very first time the database is set up.
   // Rename, reorder or archive them from the Moderation panel afterwards.

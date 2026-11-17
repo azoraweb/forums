@@ -5,12 +5,14 @@
 
 const config = require("../config");
 const db = require("../lib/db");
+const { gate } = require("../lib/features");
 const { handler, HttpError, noStore } = require("../lib/http");
 const { viewer, requireActive } = require("../lib/auth");
 const F = require("../lib/forum");
 const notify = require("../lib/notify");
 
 module.exports = handler(async (req, res) => {
+  await gate(req, "forums");
   noStore(res);
   switch (req.method) {
     case "POST": return create(req);

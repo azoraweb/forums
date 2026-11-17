@@ -18,6 +18,7 @@ module.exports = handler(async (req, res) => {
       isBusiness: v.isBusiness,
       role: v.role,
       isMod: v.isMod,
+      isDeveloper: !!v.isDeveloper,
       canManageForums: v.canManageForums,
       notify: v.notify,
       banned: v.banned,

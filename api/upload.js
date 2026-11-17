@@ -4,6 +4,7 @@
 
 const config = require("../config");
 const db = require("../lib/db");
+const { gate } = require("../lib/features");
 const { handler, HttpError, noStore } = require("../lib/http");
 const { viewer, requireActive } = require("../lib/auth");
 const F = require("../lib/forum");
@@ -17,6 +18,7 @@ const TYPES = {
 };
 
 module.exports = handler(async (req, res) => {
+  await gate(req, "forums");
   if (req.method !== "POST") throw new HttpError(405, "Method not allowed");
   noStore(res);
   const v = await viewer(req);

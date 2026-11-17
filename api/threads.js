@@ -5,11 +5,13 @@
 
 const config = require("../config");
 const db = require("../lib/db");
+const { gate } = require("../lib/features");
 const { handler, HttpError, noStore } = require("../lib/http");
 const { viewer, requireActive } = require("../lib/auth");
 const F = require("../lib/forum");
 
 module.exports = handler(async (req, res) => {
+  await gate(req, "forums");
   if (req.method === "GET") return req.query.similar !== undefined ? similar(req, res) : list(req, res);
   if (req.method === "POST") return create(req, res);
   throw new HttpError(405, "Method not allowed");

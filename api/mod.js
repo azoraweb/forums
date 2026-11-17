@@ -2,6 +2,7 @@
 //   Open reports (grouped per item), banned members, recently removed posts and the activity log.
 
 const db = require("../lib/db");
+const { gate } = require("../lib/features");
 const { handler, HttpError, noStore } = require("../lib/http");
 const { viewer, requireMod } = require("../lib/auth");
 const F = require("../lib/forum");
@@ -9,6 +10,7 @@ const F = require("../lib/forum");
 const iso = (d) => (d ? new Date(d).toISOString() : null);
 
 module.exports = handler(async (req, res) => {
+  await gate(req, "forums");
   if (req.method !== "GET") throw new HttpError(405, "Method not allowed");
   noStore(res);
   const v = await viewer(req);

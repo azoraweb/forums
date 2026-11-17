@@ -625,6 +625,11 @@
     });
     var data = {};
     try { data = await r.json(); } catch (e) {}
+    // In dev mode the API only answers admins/developers: retry with the login token.
+    if (r.status === 503 && data.underConstruction && !headers.Authorization && !opts._retried) {
+      var t2 = await token();
+      if (t2) return api(path, Object.assign({}, opts, { auth: true, _retried: true }));
+    }
     if (!r.ok) {
       var err = new Error(data.error || "Something went wrong. Please try again.");
       err.status = r.status;
@@ -799,7 +804,7 @@
         h("div", { class: "azf-me-row" }, [avatar({ name: me.name, business: me.isBusiness ? me.business : "", avatar: me.avatar }, "lg"),
           h("div", { style: "min-width:0" }, [
             h("div", { class: "azf-me-name", text: me.isBusiness && me.business ? me.business : me.name }),
-            h("div", { class: "azf-me-sub", text: me.role === "admin" ? "Azora team" : me.role === "moderator" ? "Moderator" : me.isBusiness ? "Business member" : "Member" }),
+            h("div", { class: "azf-me-sub", text: me.role === "admin" ? "Azora team" : me.role === "moderator" ? "Moderator" : me.isDeveloper ? "Developer" : me.isBusiness ? "Business member" : "Member" }),
           ])]),
         me.banned ? h("div", { class: "azf-err", text: "Your account can't post right now." + (me.banReason ? " " + me.banReason : "") }) : null,
         h("button", { class: "azf-btn primary", type: "button", onclick: function () { ask(); } }, [icon("plus"), "New post"]),

@@ -16,6 +16,29 @@
           "value": "public, max-age=300, s-maxage=300"
         }
       ]
+    },
+    {
+      "source": "/azora-admin.js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=300"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/azora-features.js",
+      "destination": "/api/features-script"
     }
   ]
 }

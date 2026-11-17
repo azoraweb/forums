@@ -84,5 +84,54 @@ Everything is in `config.js`: plan IDs, post types, character limits, photos per
 | `GET /api/mod` | mods & admins | Reports, removed posts, banned members, activity log |
 | `GET /api/me` | members | Role, ban status, email setting |
 | `POST /api/upload` | members | One photo, stored in Webflow Assets |
+| `GET /api/features` · `POST/PATCH/DELETE` | anyone · admins | Feature switches |
+| `GET /azora-features.js` | anyone | Site-wide switch script with the current switches built in |
 
 Removing a post or reply only hides it, so moderators can restore it. Every moderator action is recorded in the activity log.
+
+---
+
+# Admin panel: feature switches
+
+This project also runs the **feature switches** for the whole Azora site. Admins can put any feature into **Dev mode**:
+
+- **Admins** (`pln_administrator-jz1ge0dzd`) and **developers** (`pln_developer-qk9e0ch7`) still see the feature, with a yellow **🚧 DEV** badge and a banner at the bottom of the page.
+- **Everyone else** sees **"Under construction. Back soon."** (or your own message). Whole pages get a full-screen notice, and sections of a page get a small card in their place.
+- Only **admins** can open the panel and flip switches. Changes reach the live site within about 15 seconds.
+- **Preview as member** (in the panel or the DEV banner) shows you the site the way members see it, in your browser only.
+
+## Setup
+
+**1. Site-wide script.** In Webflow, go to **Site settings → Custom code → Head code**. Paste this *after* the Memberstack script. It must **not** have `defer` or `async`, so it can hide dev-mode features before they appear on screen:
+
+```html
+<script src="https://forums-orpin.vercel.app/azora-features.js"></script>
+```
+
+**2. Admin page.** Create a static page with the slug `admin` and add an Embed:
+
+```html
+<div data-azora-admin></div>
+<script src="https://forums-orpin.vercel.app/azora-admin.js" defer></script>
+```
+
+If you use a different slug, change `ADMIN_PAGE` in `config.js` so the "Manage" link in the DEV banner goes to the right page.
+
+Then publish.
+
+## What a switch can cover
+
+Each feature has a **key** (like `businesses`) and can cover any of these:
+
+| | How |
+|---|---|
+| **Whole pages** | List paths in the panel: `/forums`, or `/business/*` for every page under `/business/`. |
+| **Page sections** | In Webflow, select the element → **Settings → Custom attributes** → name `data-azora-feature`, value = the key. You can also list CSS selectors in the panel. |
+| **Directory tabs** | The tabs `businesses`, `groups`, `audios`, `churches` and `lkbi` follow the switch with the same key automatically. |
+| **Forums API** | When `forums` is in dev mode, the forums API itself only answers admins and developers. Moderators are blocked too. |
+
+The panel starts with Forums, Changelog, Businesses, Business posts, Groups, Audios, Churches, LKBI and AzoraEvents. You can add, edit or delete any of them. Every change is recorded in the forums activity log.
+
+Other scripts can check a switch with `window.AzoraFeatures` (`mode(key)`, `await ready`, `blocked(key)`, `placeholder(key)`, `badge(key)`).
+
+If the database can't be reached, everything stays visible, so the site never goes dark because of a switch.
