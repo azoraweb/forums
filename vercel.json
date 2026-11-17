@@ -72,7 +72,7 @@
   "rewrites": [
     {
       "source": "/azora-features.js",
-      "destination": "/api/features-script"
+      "destination": "/api/features?script=1"
     }
   ]
 }

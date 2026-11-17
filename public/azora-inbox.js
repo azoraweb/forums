@@ -104,7 +104,7 @@
   var KIND_ICON = {
     "business.review": "🏪", "business.received": "🏪", "business.approved": "🎉", "business.declined": "📝",
     "lkbi.review": "🧒", "lkbi.received": "🧒", "lkbi.approved": "🎉", "lkbi.active": "🎒", "lkbi.canceled": "📝",
-    "group.added": "🤝", "group.removed": "👋",
+    "group.added": "🤝", "group.removed": "👋", "business.follower": "👥", "business.post": "📣",
   };
 
   /* ------------------------------------------------------------ helpers */
@@ -289,7 +289,7 @@
       h("div", { class: "azi-main" }, [
         h("div", { class: "azi-title", text: x.title }),
         x.body ? h("p", { class: "azi-body", text: x.body }) : null,
-        h("div", { class: "azi-meta" }, [h("span", { text: ago(x.createdAt) }), x.link ? h("a", { href: x.link, onclick: close }, "Open dashboard →") : null]),
+        h("div", { class: "azi-meta" }, [h("span", { text: ago(x.createdAt) }), x.link ? h("a", { href: x.link, onclick: close }, x.kind === "business.post" ? "See the post →" : "Open dashboard →") : null]),
       ]),
       h("button", { class: "azi-dismiss", type: "button", title: "Clear", "aria-label": "Clear this update", text: "×", onclick: async function () {
         S.items = S.items.filter(function (y) { return y !== x; }); draw();

@@ -85,7 +85,7 @@ Everything is in `config.js`: plan IDs, post types, character limits, photos per
 | `GET /api/me` | members | Role, ban status, email setting |
 | `POST /api/upload` | members | One photo, stored in Webflow Assets |
 | `GET /api/features` · `POST/PATCH/DELETE` | anyone · admins | Feature switches |
-| `GET /azora-features.js` | anyone | Site-wide switch script with the current switches built in |
+| `GET /azora-features.js` (→ `/api/features?script=1`) | anyone | Site-wide switch script with the current switches built in |
 
 Removing a post or reply only hides it, so moderators can restore it. Every moderator action is recorded in the activity log.
 
@@ -189,4 +189,25 @@ The red badge counts unread updates plus anything waiting for review. It refresh
 4. Publish. The button only shows for logged-in members.
 
 Approvals made directly in Memberstack (instead of in the inbox) don't send the member an update. Use **Already handled** to clear those.
+
+---
+
+# Following businesses
+
+Members can follow businesses from the directory cards and from business pages. The dashboard shows a **Businesses you follow** section, and business owners see **N followers** on their business card. Tapping it lists their followers.
+
+- **New follower:** the owner gets an inbox notification ("Alice is now following Reed Pressure Pros"). It only happens once per person, so following and unfollowing repeatedly doesn't spam them.
+- **New business post:** everyone who follows that business gets it in their inbox. This needs `INBOX_SECRET` set in the **business-posts** Vercel project too.
+- **Copies kept in sync** (handy for Webflow designs):
+  - the Business item's **Followers** number field
+  - the owner's Memberstack **followers** custom field (a count)
+  - each follower's Memberstack **following** custom field (comma-separated Business item IDs)
+
+  The database is the source of truth; these are copies.
+- **The `WEBFLOW_API_TOKEN` in this project needs CMS read & write** to look up businesses and update their Followers number. Use the same token as the business-posts project.
+- **Dev mode:** follows follow the **Businesses** switch in the admin panel.
+
+`GET /api/follow` (what I follow) · `GET /api/follow?business=<id>` (count) · `GET /api/follow?mine=1` (owners: my followers) · `POST /api/follow { businessId, follow }`
+
+**Vercel function limit:** the free plan allows 12 functions, and this project uses exactly 12. The page-wide switch script was folded into `/api/features` to make room.
 

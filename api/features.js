@@ -1,5 +1,6 @@
 // /api/features — the feature switches behind the admin panel.
 //   GET                      every feature and its mode (public, cached briefly)
+//   GET     ?script=1        the site-wide /azora-features.js script
 //   POST    (admins)         { key, name, description, mode, message, paths[], selectors[] }
 //   PATCH   ?key= (admins)   any of those fields (e.g. { mode: "dev" })
 //   DELETE  ?key= (admins)
@@ -10,6 +11,7 @@ const { handler, HttpError, noStore } = require("../lib/http");
 const { viewer } = require("../lib/auth");
 const FT = require("../lib/features");
 const F = require("../lib/forum");
+const client = require("../lib/featuresClient");
 
 module.exports = handler(async (req, res) => {
   switch (req.method) {
@@ -21,7 +23,32 @@ module.exports = handler(async (req, res) => {
   }
 });
 
+// GET /azora-features.js -> /api/features?script=1 (vercel.json rewrite)
+// The site-wide script with the current switches baked in.
+async function script(req, res) {
+  let features = [];
+  let ok = true;
+  try {
+    features = (await FT.list()).map((f) => ({ key: f.key, name: f.name, mode: f.mode, message: f.message, paths: f.paths, selectors: f.selectors }));
+  } catch (e) {
+    ok = false; // database unreachable: everything stays visible (fail open)
+    console.error("[features] couldn't load switches", e);
+  }
+  const data = {
+    features,
+    plans: { admin: config.ADMIN_PLAN_ID, developer: config.DEVELOPER_PLAN_ID },
+    defaultMessage: FT.DEFAULT_MESSAGE,
+    adminPage: config.ADMIN_PAGE,
+  };
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Cache-Control", ok ? "public, max-age=0, s-maxage=15, stale-while-revalidate=300" : "no-store");
+  res.end(`/* Azora feature switches */\n(${client.toString()})(${JSON.stringify(data).replace(/</g, "\\u003c")});\n`);
+}
+
 async function get(req, res) {
+  if (req.query.script) return script(req, res);
   if (req.query.admin) {
     noStore(res);
     const v = await viewer(req);

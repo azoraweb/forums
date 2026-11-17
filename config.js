@@ -84,6 +84,17 @@ module.exports = {
   },
   DASHBOARD_URL: "/app/dash",
 
+  // ---- FOLLOWING BUSINESSES -------------------------------------------------
+  BUSINESS_COLLECTION_ID: process.env.BUSINESS_COLLECTION_ID || "681fd67661501902f76f308a",
+  BUSINESS_PAGE_PREFIX: "/businesses/",        // business pages live at /businesses/<slug>
+  // Copies kept in step for use in Webflow designs / Memberstack (optional):
+  //   Business item "Followers" (Number)  ·  member custom fields "followers" (count, on the owner)
+  //   and "following" (comma-separated Business item IDs, on the follower)
+  FOLLOWERS_FIELD_NAME: "Followers",
+  MS_FOLLOWERS_FIELD: "followers",
+  MS_FOLLOWING_FIELD: "following",
+  FOLLOWS_PER_HOUR: 60,
+
   // ---- FEATURE SWITCHES (admin panel) --------------------------------------
   // Webflow page where the admin panel lives (used for "Manage" links).
   ADMIN_PAGE: "/admin",
