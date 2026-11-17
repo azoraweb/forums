@@ -130,7 +130,7 @@ Each feature has a **key** (like `businesses`) and can cover any of these:
 | **Directory tabs** | The tabs `businesses`, `groups`, `audios`, `churches` and `lkbi` follow the switch with the same key automatically. |
 | **Forums API** | When `forums` is in dev mode, the forums API itself only answers admins and developers. Moderators are blocked too. |
 
-The panel starts with Forums, Changelog, Businesses, Business posts, Groups, Audios, Churches, LKBI and AzoraEvents. You can add, edit or delete any of them. Every change is recorded in the forums activity log.
+The panel starts with Forums, Changelog, Businesses, Business posts, Groups, Audios, Churches, LKBI, AzoraEvents and Dashboard (`/app/dash`). You can add, edit or delete any of them. Every change is recorded in the forums activity log.
 
 Other scripts can check a switch with `window.AzoraFeatures` (`mode(key)`, `await ready`, `blocked(key)`, `placeholder(key)`, `badge(key)`).
 
