@@ -104,7 +104,7 @@
   var KIND_ICON = {
     "business.review": "🏪", "business.received": "🏪", "business.approved": "🎉", "business.declined": "📝",
     "lkbi.review": "🧒", "lkbi.received": "🧒", "lkbi.approved": "🎉", "lkbi.active": "🎒", "lkbi.canceled": "📝",
-    "group.added": "🤝", "group.removed": "👋", "business.follower": "👥", "business.post": "📣",
+    "group.added": "🤝", "group.removed": "👋", "business.follower": "👥", "business.post": "📣", "business.owner": "🔑", "business.owner.removed": "🔑",
   };
 
   /* ------------------------------------------------------------ helpers */
