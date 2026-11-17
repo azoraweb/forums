@@ -19,8 +19,9 @@ const F = require("../lib/forum");
 const iso = (d) => (d ? new Date(d).toISOString() : null);
 
 function secretOk(req) {
-  const want = process.env.INBOX_SECRET || "";
-  const got = String(req.headers["x-azora-secret"] || "");
+  // trim: a stray space or line break pasted into Vercel shouldn't break things
+  const want = String(process.env.INBOX_SECRET || "").trim();
+  const got = String(req.headers["x-azora-secret"] || "").trim();
   if (!want || got.length !== want.length) return false;
   return crypto.timingSafeEqual(Buffer.from(got), Buffer.from(want));
 }
@@ -29,16 +30,26 @@ module.exports = handler(async (req, res) => {
   noStore(res);
   // Server-to-server events from the accounts project.
   if (req.method === "POST" && req.headers["x-azora-secret"] !== undefined) {
-    if (!secretOk(req)) throw new HttpError(401, "Bad inbox secret.");
+    if (!secretOk(req)) {
+      const why = process.env.INBOX_SECRET ? "wrong" : "missing-here";
+      await note("inbox_rejected", JSON.stringify({ at: new Date().toISOString(), why, type: String(req.body?.event?.type || "").slice(0, 40) }));
+      throw new HttpError(401, why === "missing-here"
+        ? "INBOX_SECRET isn't set in the forums project."
+        : "INBOX_SECRET doesn't match the forums project's value.");
+    }
     const events = Array.isArray(req.body.events) ? req.body.events : [req.body.event];
     const out = [];
-    for (const e of events.filter(Boolean).slice(0, 20)) out.push(await IB.handleEvent(e));
+    for (const e of events.filter(Boolean).slice(0, 20)) {
+      const r = await IB.handleEvent(e);
+      out.push(r);
+      await note(`inbox_last:${String(e.type || "").slice(0, 40)}`, JSON.stringify({ at: new Date().toISOString(), ...(r.notified !== undefined ? { notified: r.notified } : {}) }));
+    }
     return { results: out };
   }
 
   await gate(req, "inbox");
   const v = await viewer(req);
-  if (req.method === "GET") return req.query.count ? count(v) : list(v);
+  if (req.method === "GET") return req.query.health ? health(v) : req.query.count ? count(v) : list(v);
   if (req.method !== "POST") throw new HttpError(405, "Method not allowed");
   const b = req.body;
   if (b.action === "read") return markRead(v, b);
@@ -46,6 +57,30 @@ module.exports = handler(async (req, res) => {
   if (b.action === "decide") return decide(v, b);
   throw new HttpError(400, "Unknown action.");
 });
+
+// Remember when each kind of event last arrived (shown in the admin panel).
+async function note(key, value) {
+  try {
+    await db.q(`INSERT INTO azf_meta (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [key, value]);
+  } catch (e) { /* never block on bookkeeping */ }
+}
+
+// GET ?health=1 (admins): is everything connected?
+async function health(v) {
+  if (!v.isAdmin) throw new HttpError(403, "Admins only.");
+  const rows = await db.q(`SELECT key, value FROM azf_meta WHERE key LIKE 'inbox_%'`);
+  const meta = {};
+  for (const r of rows) { try { meta[r.key] = JSON.parse(r.value); } catch (e) { /* skip */ } }
+  const last = {};
+  for (const k of Object.keys(meta)) if (k.startsWith("inbox_last:")) last[k.slice(11)] = meta[k];
+  const f = await db.one(`SELECT count(*)::int AS n, count(DISTINCT business_id)::int AS b FROM follows`);
+  return {
+    secretSet: !!String(process.env.INBOX_SECRET || "").trim(),
+    last,
+    rejected: meta.inbox_rejected || null,
+    follows: { total: Number(f.n), businesses: Number(f.b) },
+  };
+}
 
 function serialize(r) {
   return {

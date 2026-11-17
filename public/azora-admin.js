@@ -71,6 +71,19 @@
 .aza-help h3 { color:#fff; font-size:15px; margin-bottom:8px; }
 .aza-help code { background:rgba(255,255,255,.08); padding:2px 6px; border-radius:5px; font-size:13px; color:#fff; }
 .aza-help ol { margin:6px 0 0 18px; padding:0; } .aza-help li + li { margin-top:4px; }
+.aza-health { margin-top:24px; border:1px solid var(--line); border-radius:16px; background:var(--panel); overflow:hidden; }
+.aza-health-h { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:16px 20px; border-bottom:1px solid var(--line); }
+.aza-health-h h3 { font-size:15px; font-weight:700; color:#fff; }
+.aza-hrow { display:grid; grid-template-columns:22px 1fr auto; gap:12px; align-items:center; padding:12px 20px; font-size:14px; }
+.aza-hrow + .aza-hrow { border-top:1px solid var(--line); }
+.aza-hrow .d { width:10px; height:10px; border-radius:50%; background:var(--faint); justify-self:center; }
+.aza-hrow .d.ok { background:var(--green); box-shadow:0 0 8px var(--green); }
+.aza-hrow .d.bad { background:var(--danger); box-shadow:0 0 8px var(--danger); }
+.aza-hrow .d.idle { background:var(--amber); }
+.aza-hrow b { color:#fff; font-weight:600; display:block; }
+.aza-hrow small { color:var(--dim); font-size:12.5px; }
+.aza-hrow .w { color:var(--silver); font-size:13px; text-align:right; }
+.aza-health-note { padding:12px 20px 16px; color:var(--dim); font-size:13px; border-top:1px solid var(--line); }
 .aza-empty { text-align:center; padding:60px 20px; border:1px dashed var(--line2); border-radius:16px; color:var(--dim); }
 .aza-empty .big { font-size:36px; margin-bottom:8px; } .aza-empty h3 { color:#fff; font-size:18px; margin-bottom:6px; }
 .aza-empty .aza-btn { margin-top:16px; }
@@ -349,8 +362,47 @@
         h("li", null, ["Directory tabs (businesses, groups, audios, churches, lkbi) are switched automatically by their key."]),
       ]),
     ]));
+    var healthEl = h("div", { class: "aza-health" });
+    el.appendChild(healthEl);
     drawSummary();
     load();
+    loadHealth(healthEl);
+  }
+
+  // ---- Inbox connections: is each project reaching the inbox?
+  async function loadHealth(box) {
+    clear(box);
+    box.appendChild(h("div", { class: "aza-health-h" }, [h("h3", { text: "Inbox connections" }), h("button", { class: "aza-btn sm ghost", type: "button", text: "Check again", onclick: function () { loadHealth(box); } })]));
+    var d;
+    try { d = await api("/api/inbox?health=1"); }
+    catch (e) { box.appendChild(h("div", { class: "aza-health-note", text: "Couldn't check: " + e.message })); return; }
+    function row(state, title, sub, when) {
+      box.appendChild(h("div", { class: "aza-hrow" }, [h("span", { class: "d " + state }), h("div", null, [h("b", { text: title }), sub ? h("small", { text: sub }) : null]), h("span", { class: "w", text: when || "" })]));
+    }
+    var L = d.last || {};
+    function seen(types) {
+      var best = null;
+      types.forEach(function (t) { if (L[t] && (!best || L[t].at > best.at)) best = L[t]; });
+      return best;
+    }
+    row(d.secretSet ? "ok" : "bad", "Forums project has INBOX_SECRET", d.secretSet ? "Ready to receive updates from your other projects." : "Add INBOX_SECRET to the forums project in Vercel, then redeploy.", "");
+    [
+      ["Business registrations", "accounts project", ["business.registered"]],
+      ["LKBi registrations & status", "accounts project", ["lkbi.registered", "lkbi.status"]],
+      ["Group adds & removes", "accounts project", ["group.member"]],
+      ["New business posts → followers", "business-posts project", ["business.post"]],
+    ].forEach(function (x) {
+      var s = seen(x[2]);
+      var extra = s && s.notified !== undefined ? " · reached " + s.notified + " follower" + (s.notified === 1 ? "" : "s") : "";
+      row(s ? "ok" : "idle", x[0], "From the " + x[1] + (s ? extra : " · nothing received yet"), s ? ago(s.at) : "never");
+    });
+    if (d.rejected) {
+      row("bad", "A project was turned away", d.rejected.why === "missing-here"
+        ? "INBOX_SECRET isn't set in the forums project."
+        : "Its INBOX_SECRET doesn't match the forums project's" + (d.rejected.type ? " (it was sending: " + d.rejected.type + ")" : "") + ". Copy the exact same value into every project and redeploy.", ago(d.rejected.at));
+    }
+    row(d.follows.total ? "ok" : "idle", "Follows", d.follows.total + " follow" + (d.follows.total === 1 ? "" : "s") + " across " + d.follows.businesses + " business" + (d.follows.businesses === 1 ? "" : "es"), "");
+    box.appendChild(h("div", { class: "aza-health-note", text: "“Nothing received yet” is normal until that thing happens once. If you just did it and it still says never, that project is missing INBOX_SECRET or hasn't been redeployed since you added it." }));
   }
 
   function start() { var el = document.querySelector("[data-azora-admin]"); if (el) boot(el); }
