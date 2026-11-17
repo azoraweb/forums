@@ -96,6 +96,7 @@ module.exports = {
     { key: "lkbi", name: "LKBI", description: "Little Kids Big Ideas page and directory tab.", paths: ["/lkbi"], selectors: [] },
     { key: "events", name: "AzoraEvents", description: "The events page.", paths: ["/events-azora"], selectors: [] },
     { key: "dashboard", name: "Dashboard", description: "The member dashboard (profile, business card, LKBI students, business posts).", paths: ["/app/dash", "/app/dash/*"], selectors: [], since: 3 },
+    { key: "team", name: "Meet the team", description: "The Meet the team page.", paths: ["/team"], selectors: ["[data-azora-team]"], since: 4 },
   ],
 
   // Forums created the very first time the database is set up.

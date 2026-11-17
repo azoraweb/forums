@@ -135,3 +135,23 @@ The panel starts with Forums, Changelog, Businesses, Business posts, Groups, Aud
 Other scripts can check a switch with `window.AzoraFeatures` (`mode(key)`, `await ready`, `blocked(key)`, `placeholder(key)`, `badge(key)`).
 
 If the database can't be reached, everything stays visible, so the site never goes dark because of a switch.
+
+---
+
+# Meet the team page
+
+**Setup:** create a static page with the slug `team`, then add an Embed:
+
+```html
+<div data-azora-team></div>
+<script src="https://forums-orpin.vercel.app/azora-team.js" defer></script>
+```
+
+Optional: `data-title="..."` and `data-subtitle="..."` on the `<div>` change the heading. Point your footer's "The Dream Team" link to `/team`.
+
+**Editing:** log in as an admin and open the page. You'll see **+ Add team member**, and every card gets ← → (reorder), ✎ (edit) and ◌ (hide/show) buttons.
+- **Add:** search any Azora member by name, email or business, then set their **role** and **quote**.
+- **Optional extras:** a different photo (otherwise their Memberstack profile photo is used), a different display name, and a link.
+- **Profile updates:** names and photos stay in step with members' profiles each time an admin opens the page.
+
+Only admins can make changes. The server checks the admin plan on every change. The page also has its own **Meet the team** switch in the admin panel.
