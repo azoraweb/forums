@@ -127,7 +127,7 @@ Each feature has a **key** (like `businesses`) and can cover any of these:
 |---|---|
 | **Whole pages** | List paths in the panel: `/forums`, or `/business/*` for every page under `/business/`. |
 | **Page sections** | In Webflow, select the element → **Settings → Custom attributes** → name `data-azora-feature`, value = the key. You can also list CSS selectors in the panel. |
-| **Directory tabs** | The tabs `businesses`, `groups`, `audios`, `churches` and `lkbi` follow the switch with the same key automatically. |
+| **Built into the widgets** | `businesses`: the directory tab, business pages, the dashboard business card, the Register / Edit / Activate buttons and business posts. `business-posts`: the business page feed and the dashboard "Your posts". `groups`, `churches` and `audios`: their tabs and pages. `lkbi`: the tab and the dashboard LKBI card. These follow their switch on their own, with no Webflow attribute needed. |
 | **Forums API** | When `forums` is in dev mode, the forums API itself only answers admins and developers. Moderators are blocked too. |
 
 The panel starts with Forums, Changelog, Businesses, Business posts, Groups, Audios, Churches, LKBI, AzoraEvents and Dashboard (`/app/dash`). You can add, edit or delete any of them. Every change is recorded in the forums activity log.
