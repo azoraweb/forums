@@ -74,6 +74,16 @@ module.exports = {
   // How long public pages may be cached at Vercel's edge (seconds).
   FEED_CACHE_SECONDS: 10,
 
+  // ---- INBOX ---------------------------------------------------------------
+  // Business review decisions add/remove these Memberstack plans (same IDs as
+  // the accounts project).
+  BUSINESS_PLANS: {
+    pending: "pln_business-registration-pending-8216101z6",
+    approved: "pln_business-approved-m41qi0ern",
+    scholarship: "pln_business-scholarship-applied-4016201mr",
+  },
+  DASHBOARD_URL: "/app/dash",
+
   // ---- FEATURE SWITCHES (admin panel) --------------------------------------
   // Webflow page where the admin panel lives (used for "Manage" links).
   ADMIN_PAGE: "/admin",
@@ -97,6 +107,7 @@ module.exports = {
     { key: "events", name: "AzoraEvents", description: "The events page.", paths: ["/events-azora"], selectors: [] },
     { key: "dashboard", name: "Dashboard", description: "The member dashboard (profile, business card, LKBI students, business posts).", paths: ["/app/dash", "/app/dash/*"], selectors: [], since: 3 },
     { key: "team", name: "Meet the team", description: "The Meet the team page.", paths: ["/team"], selectors: ["[data-azora-team]"], since: 4 },
+    { key: "inbox", name: "Inbox", description: "The inbox button in the navbar (hidden from members while in dev mode).", paths: [], selectors: [], since: 5 },
   ],
 
   // Forums created the very first time the database is set up.

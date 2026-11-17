@@ -155,3 +155,38 @@ Optional: `data-title="..."` and `data-subtitle="..."` on the `<div>` change the
 - **Profile updates:** names and photos stay in step with members' profiles each time an admin opens the page.
 
 Only admins can make changes. The server checks the admin plan on every change. The page also has its own **Meet the team** switch in the admin panel.
+
+---
+
+# Inbox
+
+A button next to **DASH** in the navbar opens a half-page drawer, like Webflow's cart.
+
+**Members** get updates here:
+- their business registration was received, approved (paid plan or scholarship) or declined, with your note
+- their child's LKBi registration was received, approved, enrolled or canceled
+- they were added to or removed from a group
+
+**Admins** also get a **Needs review** tab:
+- **New business registrations**, with contact details: **Approve** (they pick monthly/yearly to activate), **Scholarship** (free listing) or **Decline…** with an optional note. The Memberstack plans change for you (pending → approved/scholarship), and the member is told in their inbox.
+- **New LKBi registrations**: **Approve** or **Decline**. This sets the Status on the registration, exactly like the LKBi review screen, and the parent is told.
+- **Already handled** closes an item without changing anything, for example if you approved someone directly in Memberstack.
+
+The red badge counts unread updates plus anything waiting for review. It refreshes every minute. Any link ending in `#inbox` opens the drawer. The inbox has its own switch in the admin panel.
+
+## Setup
+
+1. **Shared secret:** make up a long random string, like `azora-inbox-` followed by 30 random letters and numbers. In Vercel, add it as `INBOX_SECRET` in **both** the **forums** project and the **accounts** project, then redeploy both. This is how the accounts project tells the inbox about new registrations and group changes.
+2. **Script:** in Webflow **Site settings → Custom code → Footer code**, add:
+   ```html
+   <script src="https://forums-orpin.vercel.app/azora-inbox.js" defer></script>
+   ```
+3. **Button:** in the navbar, drop an **Embed** right next to the DASH button:
+   ```html
+   <div data-azora-inbox></div>
+   ```
+   Add `data-label="Inbox"` to show text beside the icon. On phones, put a second copy next to the hamburger icon (outside the collapsing menu) so it's always visible. Both stay in sync.
+4. Publish. The button only shows for logged-in members.
+
+Approvals made directly in Memberstack (instead of in the inbox) don't send the member an update. Use **Already handled** to clear those.
+
